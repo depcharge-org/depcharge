@@ -1,25 +1,35 @@
-% +depcharge/configure_project.m
-% Intended to be called from within a user's project, eg
-% /project_name/+project_name/+depcharge/update.m
-% Configures the project by first programatically determining 
-% The project root directory and package name.
-% Also verify that the top level package name isn't "depcharge", which
-% would create name conflicts.
 function configure_project()
-    % Get the full path of the calling function
-    st = dbstack('-completenames');
-    if length(st) > 1
-        callingFile = st(2).file;
-        [callingPath, ~, ~] = fileparts(callingFile);
-        
-        % Parse the package path
-        [packageNames, rootPath] = depcharge.parse_package_path(callingPath);
-        
-        % Print the results
-        fprintf('Package names: %s\n', strjoin(packageNames, ', '));
-        fprintf('Root path: %s\n', rootPath);
-        fprintf('Full file path: %s\n', callingFile);
-    else
-        fprintf('This function was called from the command window.\n');
+    % configure_project.m
+    % Configures the project by determining the project root directory and package name.
+    % Verifies that the top level package name isn't "depcharge" to avoid name conflicts.
+    % Manages project dependencies based on deplist.json.
+
+    % Get the caller context
+    context = depcharge.get_caller_context(2);
+
+    % Print the results
+    fprintf('Package names: %s\n', strjoin(context.packageNames, ', '));
+    fprintf('Root path: %s\n', context.rootPath);
+    fprintf('Full file path: %s\n', context.callingFile);
+
+    % Verify that the top level package name isn't "depcharge"
+    if context.packageNames(1) == "depcharge"
+        error('depcharge:configureProject:InvalidPackageName', ...
+              'The top level package name cannot be "depcharge" as it would create name conflicts.');
     end
+
+    % Parse the deplist.json file
+    configPath = fullfile(context.rootPath,sprintf("+%s/",context.packageNames));
+    config = depcharge.parse_deplist(configPath);
+
+    % Create _deps directory if it doesn't exist
+    depsPath = fullfile(context.rootPath, '_deps');
+    if ~exist(depsPath, 'dir')
+        mkdir(depsPath);
+    end
+
+    % Manage dependencies
+    depcharge.manage_dependencies(config, depsPath);
+
+    fprintf('Project configuration and dependency management completed.\n');
 end
