@@ -1,0 +1,37 @@
+{
+  "project_name": "ExampleProject",
+  "version": "1.0.0",
+  "dependencies": [
+    {
+      "name": "UtilityLibrary",
+      "package": "utillib",
+      "type": "git",
+      "git_repo": "https://github.com/example/utility-library.git",
+      "git_tag": "v2.0",
+      "required_version": true,
+      "installation": "local",
+      "update_strategy": "always",
+      "custom_handler": "project.depcharge.UtilLibHandler"
+    },
+    {
+      "name": "LocalTool",
+      "package": "localtool",
+      "type": "path",
+      "path": "${PROJECT_ROOT}/../LocalTool",
+      "version": "1.2.3",
+      "installation": "local",
+      "update_strategy": "if_not_exists"
+    },
+    {
+      "name": "FileExchangeTool",
+      "type": "zip",
+      "url": "https://www.mathworks.com/matlabcentral/fileexchange/download.zip",
+      "version": "2.1.0",
+      "installation": "global",
+      "retention": "30d"
+    }
+  ],
+  "allow_later_versions": false,
+  "recursive_dependencies": true,
+  "dependency_cache": "${PROJECT_ROOT}/_deps_cache"
+}
